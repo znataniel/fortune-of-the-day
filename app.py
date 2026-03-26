@@ -2,17 +2,6 @@ import sqlite3
 import random
 from flask import Flask, render_template, request, jsonify
 
-def create_app():
-    app = Flask(__name__)
-
-    with app.app_context():
-        # Initialize DB here
-        init_db()
-
-    return app
-
-app = create_app()
-
 DATABASE = 'fortunes.db'
 
 def get_db_connection():
@@ -39,6 +28,17 @@ def init_db():
     
     conn.commit()
     conn.close()
+
+def create_app():
+    a = Flask(__name__)
+
+    with a.app_context():
+        # Initialize DB here
+        init_db()
+
+    return a
+
+app = create_app()
 
 @app.route('/')
 def index():
