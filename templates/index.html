@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fortune of the Day</title>
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .fortune-card {
+            max-width: 600px;
+            width: 100%;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            background: white;
+            text-align: center;
+        }
+        #fortune-text {
+            font-size: 1.5rem;
+            font-style: italic;
+            min-height: 4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="fortune-card">
+        <h1 class="mb-4 text-primary">Fortune of the Day</h1>
+        
+        <div id="fortune-text" class="mb-4">
+            Loading your fortune...
+        </div>
+
+        <div class="d-grid gap-2 mb-5">
+            <button id="reroll-btn" class="btn btn-primary btn-lg">Reroll Fortune</button>
+        </div>
+
+        <hr>
+
+        <div class="mt-4">
+            <h5>Share your wisdom</h5>
+            <div class="input-group mb-3">
+                <input type="text" id="new-fortune-input" class="form-control" placeholder="Enter a new fortune..." aria-label="New fortune">
+                <button id="submit-btn" class="btn btn-success" type="button">Submit</button>
+            </div>
+            <div id="status-msg" class="small mt-2"></div>
+        </div>
+    </div>
+
+    <!-- JavaScript for Interactivity -->
+    <script>
+        const fortuneDisplay = document.getElementById('fortune-text');
+        const rerollBtn = document.getElementById('reroll-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        const inputField = document.getElementById('new-fortune-input');
+        const statusMsg = document.getElementById('status-msg');
+
+        // Function to fetch a random fortune
+        async function fetchFortune() {
+            try {
+                const response = await fetch('/api/fortune');
+                const data = await response.json();
+                fortuneDisplay.innerText = data.fortune;
+            } catch (err) {
+                fortuneDisplay.innerText = "Failed to load fortune. Is the server running?";
+            }
+        }
+
+        // Function to submit a new fortune
+        async function submitFortune() {
+            const text = inputField.value.trim();
+            if (!text) return;
+
+            submitBtn.disabled = true;
+            try {
+                const response = await fetch('/api/fortune', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fortune: text })
+                });
+
+                if (response.ok) {
+                    statusMsg.innerText = "Fortune added!";
+                    statusMsg.className = "small mt-2 text-success";
+                    inputField.value = '';
+                    setTimeout(() => statusMsg.innerText = "", 3000);
+                } else {
+                    throw new Error("Failed to add fortune");
+                }
+            } catch (err) {
+                statusMsg.innerText = "Error saving fortune.";
+                statusMsg.className = "small mt-2 text-danger";
+            } finally {
+                submitBtn.disabled = false;
+            }
+        }
+
+        rerollBtn.addEventListener('click', fetchFortune);
+        submitBtn.addEventListener('click', submitFortune);
+
+        // Initial load
+        window.onload = fetchFortune;
+    </script>
+</body>
+</html>
