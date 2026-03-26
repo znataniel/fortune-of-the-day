@@ -2,7 +2,16 @@ import sqlite3
 import random
 from flask import Flask, render_template, request, jsonify
 
-app = Flask(__name__)
+def create_app():
+    app = Flask(__name__)
+
+    with app.app_context():
+        # Initialize DB here
+        init_db()
+
+    return app
+
+app = create_app()
 
 DATABASE = 'fortunes.db'
 
@@ -58,5 +67,4 @@ def add_fortune():
     return jsonify({"message": "Fortune added successfully!"}), 201
 
 if __name__ == '__main__':
-    init_db()
     app.run(debug=True, host='0.0.0.0', port=5000)
